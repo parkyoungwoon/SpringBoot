@@ -58,36 +58,52 @@
 
 <th:block layout:fragment="script">
     <script th:inline="javascript">
-        /*<![CDATA[*/
+        window.onload = () => {
+            renderPostInfo();
+        }
 
-            window.onload = () => {
+
+        // 게시글 상세정보 렌더링
+        function renderPostInfo() {
+            const post = [[ ${post} ]];
+
+            if ( !post ) {
                 initCreatedDate();
+                return false;
             }
 
+            const form = document.getElementById('saveForm');
+            const fields = ['id', 'title', 'content', 'writer', 'noticeYn'];
+            form.isNotice.checked = post.noticeYn;
+            form.createdDate.value = dayjs(post.createdDate).format('YYYY-MM-DD HH:mm');
 
-            // 등록일 초기화
-            function initCreatedDate() {
-                document.getElementById('createdDate').value = dayjs().format('YYYY-MM-DD');
+            fields.forEach(field => {
+                form[field].value = post[field];
+            })
+        }
+
+
+        // 등록일 초기화
+        function initCreatedDate() {
+            document.getElementById('createdDate').value = dayjs().format('YYYY-MM-DD');
+        }
+
+
+        // 게시글 저장(수정)
+        function savePost() {
+            const form = document.getElementById('saveForm');
+            const fields = [form.title, form.writer, form.content];
+            const fieldNames = ['제목', '이름', '내용'];
+
+            for (let i = 0, len = fields.length; i < len; i++) {
+                isValid(fields[i], fieldNames[i]);
             }
 
-
-            // 게시글 저장(수정)
-            function savePost() {
-                const form = document.getElementById('saveForm');
-                const fields = [form.title, form.writer, form.content];
-                const fieldNames = ['제목', '이름', '내용'];
-
-                for (let i = 0, len = fields.length; i < len; i++) {
-                    isValid(fields[i], fieldNames[i]);
-                }
-
-                document.getElementById('saveBtn').disabled = true;
-                form.noticeYn.value = form.isNotice.checked;
-                form.action = [[ ${post == null} ]] ? '/post/save.do' : '/post/update.do';
-                form.submit();
-            }
-
-        /*]]>*/
+            document.getElementById('saveBtn').disabled = true;
+            form.noticeYn.value = form.isNotice.checked;
+            form.action = [[ ${post == null} ]] ? '/post/save.do' : '/post/update.do';
+            form.submit();
+        }
         </script>
 </th:block>
 </html>
